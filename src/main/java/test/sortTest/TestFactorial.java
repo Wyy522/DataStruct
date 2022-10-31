@@ -1,4 +1,4 @@
-package test;
+package test.sortTest;
 
 public class TestFactorial {
     public static void main(String[] args) {

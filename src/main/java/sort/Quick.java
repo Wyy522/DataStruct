@@ -47,9 +47,11 @@ public class Quick {
         exChange(a, lo, right);
         return  right;
     }
+
     private static boolean less(Comparable v, Comparable w) {
         return v.compareTo(w) < 0;
     }
+
     private static void exChange(Comparable[] a, int i, int j) {
         Comparable temp;
         temp = a[j];

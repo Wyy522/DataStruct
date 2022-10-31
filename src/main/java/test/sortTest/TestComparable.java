@@ -1,4 +1,4 @@
-package test;
+package test.sortTest;
 
 import sort.Student;
 

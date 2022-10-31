@@ -1,14 +1,14 @@
-package test;
+package test.sortTest;
 
-import sort.Merge;
-import sort.Selection;
+import sort.Insertion;
+import sort.Shell;
 
 import java.util.Arrays;
 
-public class MergeTest {
+public class ShellTest {
     public static void main(String[] args) {
         Integer[] arr ={4,5,6,1,2,3,7,9,8};
-        Merge.sort(arr);
+        Shell.sort(arr);
         System.out.println(Arrays.toString(arr));
     }
 }
