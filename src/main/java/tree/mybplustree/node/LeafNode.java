@@ -25,7 +25,7 @@ public class LeafNode extends AbstractNode {
 
 
     @Override
-    public Node insertValue(String key, String value,Node root) {
+    public Node insertValue(String key, String value, Node root) {
 
         //查找插入位置
         int loc = Collections.binarySearch(keys, key);
@@ -82,13 +82,28 @@ public class LeafNode extends AbstractNode {
 
     @Override
     public String getValue(String key) {
+        int loc = Collections.binarySearch(keys, key);
+        return loc >= 0 ? values.get(loc) : null;
+    }
+
+    @Override
+    public List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2) {
         return null;
     }
 
     @Override
     public boolean deleteValue(String key) {
+        //找到Key的索引位置
+        int loc = Collections.binarySearch(keys, key);
+        if (loc >= 0) {
+            //删除
+            keys.remove(loc);
+            values.remove(loc);
+            return true;
+        }
         return false;
     }
+
     @Override
     public String getFirstLeafKey() {
         return keys.get(0);
@@ -106,6 +121,6 @@ public class LeafNode extends AbstractNode {
 
     @Override
     public boolean isUnderflow() {
-        return false;
+        return values.size()<branchingFactor/2;
     }
 }

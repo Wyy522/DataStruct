@@ -3,6 +3,7 @@ package tree.mybplustree;
 import tree.mybplustree.node.InternalNode;
 import tree.mybplustree.node.LeafNode;
 import tree.mybplustree.node.Node;
+import tree.mybplustree.node.RangePolicy;
 
 import java.util.*;
 
@@ -40,6 +41,14 @@ public class BPlusTree {
 
     public void insert(String key,String value){
         root = root.insertValue(key, value, root);
+    }
+
+    public String search(String key){
+        return root.getValue(key);
+    }
+
+    public List<String> searchRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2) {
+        return root.getRange(key1, policy1, key2, policy2);
     }
 
     public boolean delete(String key){

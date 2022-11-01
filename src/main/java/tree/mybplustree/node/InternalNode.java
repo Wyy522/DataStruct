@@ -21,10 +21,10 @@ public class InternalNode extends AbstractNode {
     }
 
     @Override
-    public Node insertValue(String key, String value,Node root) {
+    public Node insertValue(String key, String value, Node root) {
 
         Node child = getChild(key);
-        child.insertValue(key, value,root);
+        child.insertValue(key, value, root);
         //判断叶子节点是否需要切分
         if (child.isOverflow()) {
             Node sibling = child.split();
@@ -37,17 +37,11 @@ public class InternalNode extends AbstractNode {
             newRoot.keys.add(sibling.getFirstLeafKey());
             newRoot.children.add(this);
             newRoot.children.add(sibling);
-           return newRoot;
+            return newRoot;
         }
         return root;
     }
 
-    public Node getChild(String key) {
-        int loc = Collections.binarySearch(keys, key);
-        //要进行loc+1的原因是因为第一个节点没有存在上层节点中
-        int valueIndex = loc >= 0 ? loc + 1 : -loc - 1;
-        return children.get(valueIndex);
-    }
 
     public void insertChild(String key, Node sibling) {
         int loc = Collections.binarySearch(keys, key);
@@ -58,6 +52,33 @@ public class InternalNode extends AbstractNode {
             keys.add(childIndex, key);
             children.add(childIndex + 1, sibling);
         }
+    }
+
+    @Override
+    public String getValue(String key) {
+        return getChild(key).getValue(key);
+    }
+
+    @Override
+    public List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2) {
+        return getChild(key1).getRange(key1, policy1, key2, policy2);
+    }
+
+    @Override
+    public boolean deleteValue(String key) {
+        Node child = getChild(key);
+        child.deleteValue(key);
+        if (child.isUnderflow()){
+            //TODO
+        }
+        return getChild(key).deleteValue(key);
+    }
+
+    public Node getChild(String key) {
+        int loc = Collections.binarySearch(keys, key);
+        //要进行loc+1的原因是因为第一个节点没有存在上层节点中
+        int valueIndex = loc >= 0 ? loc + 1 : -loc - 1;
+        return children.get(valueIndex);
     }
 
     @Override
@@ -81,16 +102,6 @@ public class InternalNode extends AbstractNode {
     }
 
     @Override
-    public String getValue(String key) {
-        return null;
-    }
-
-    @Override
-    public boolean deleteValue(String key) {
-        return false;
-    }
-
-    @Override
     public String getFirstLeafKey() {
         return children.get(0).getFirstLeafKey();
     }
@@ -107,6 +118,6 @@ public class InternalNode extends AbstractNode {
 
     @Override
     public boolean isUnderflow() {
-        return false;
+        return children.size()<(branchingFactor+1)/2;
     }
 }

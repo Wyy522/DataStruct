@@ -1,5 +1,7 @@
 package tree.mybplustree.node;
 
+import java.util.List;
+
 public interface Node{
 
     int DEFAULT_BRANCHING_FACTOR = 128;
@@ -24,4 +26,5 @@ public interface Node{
 
     public String toString() ;
 
+    List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2);
 }

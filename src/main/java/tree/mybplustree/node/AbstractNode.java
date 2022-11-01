@@ -5,7 +5,6 @@ import java.util.List;
 public abstract class AbstractNode implements Node{
 
     List<String> keys;
-    public  Node root;
     @Override
     public int keyNumber() {
         return keys.size();
@@ -13,6 +12,9 @@ public abstract class AbstractNode implements Node{
 
     @Override
     public abstract String getValue(String key);
+
+    @Override
+    public abstract List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2);
 
     @Override
     public abstract boolean deleteValue(String key);
