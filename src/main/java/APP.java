@@ -4,7 +4,12 @@ import java.util.List;
 
 public class APP {
     public static void main(String[] args) {
-        List<Integer> a =new ArrayList<>(4);
+
+    }
+
+    //二分查找测试
+    private static void binarySearchTest() {
+        List<Integer> a = new ArrayList<>(4);
         a.add(5);
         a.add(6);
         a.add(8);
