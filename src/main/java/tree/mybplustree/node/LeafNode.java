@@ -2,9 +2,7 @@ package tree.mybplustree.node;
 
 import practice.excutorservice.TaskExecutor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class LeafNode extends AbstractNode {
 
@@ -51,6 +49,52 @@ public class LeafNode extends AbstractNode {
     }
 
     @Override
+    public String getValue(String key) {
+        int loc = Collections.binarySearch(keys, key);
+        return loc >= 0 ? values.get(loc) : null;
+    }
+
+    @Override
+    public List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2) {
+        List<String> result = new LinkedList<>();
+        LeafNode thisNode = this;
+        while (thisNode != null) {
+            Iterator<String> kIter = thisNode.keys.iterator();
+            Iterator<String> vIter = thisNode.values.iterator();
+            while (kIter.hasNext()) {
+                String key = kIter.next();
+                String value = vIter.next();
+                int cmp1 = key.compareTo(key1);
+                int cmp2 = key.compareTo(key2);
+
+                //String的compareTo返回值问题:如果key的字典顺序在key1前面,则返回负数。如果在key1后面,则返回正数。如果相等,则返回0;
+                //RangePolicy是考虑范围查询的边界区间,如果是EXCLUSIVE则不包含该值(开区间),反之INCLUSIVE则是闭区间。
+                if (((policy1 == RangePolicy.EXCLUSIVE && cmp1 > 0) || policy1 == RangePolicy.INCLUSIVE && cmp1 >= 0)
+                        && ((policy2 == RangePolicy.EXCLUSIVE && cmp2 < 0 || policy2 == RangePolicy.INCLUSIVE && cmp2 <= 0)))
+                    result.add(value);
+                //当cmp2大于0时说明已查询到所有值。
+                else if ((policy2 == RangePolicy.EXCLUSIVE && cmp2 >= 0) || (policy2 == RangePolicy.INCLUSIVE && cmp2 > 0))
+                    return result;
+            }
+            thisNode = thisNode.next;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean deleteValue(String key,Node root) {
+        //找到Key的索引位置
+        int loc = Collections.binarySearch(keys, key);
+        if (loc >= 0) {
+            //删除
+            keys.remove(loc);
+            values.remove(loc);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public Node split() {
         //创建兄弟节点
         LeafNode sibling = new LeafNode(branchingFactor);
@@ -77,31 +121,10 @@ public class LeafNode extends AbstractNode {
 
     @Override
     public void merge(Node sibling) {
-
-    }
-
-    @Override
-    public String getValue(String key) {
-        int loc = Collections.binarySearch(keys, key);
-        return loc >= 0 ? values.get(loc) : null;
-    }
-
-    @Override
-    public List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2) {
-        return null;
-    }
-
-    @Override
-    public boolean deleteValue(String key) {
-        //找到Key的索引位置
-        int loc = Collections.binarySearch(keys, key);
-        if (loc >= 0) {
-            //删除
-            keys.remove(loc);
-            values.remove(loc);
-            return true;
-        }
-        return false;
+        LeafNode rightSiblingNode=(LeafNode) sibling;
+        keys.addAll(rightSiblingNode.keys);
+        values.addAll(rightSiblingNode.values);
+        next=rightSiblingNode.next;
     }
 
     @Override
@@ -121,6 +144,6 @@ public class LeafNode extends AbstractNode {
 
     @Override
     public boolean isUnderflow() {
-        return values.size()<branchingFactor/2;
+        return values.size() < branchingFactor / 2;
     }
 }

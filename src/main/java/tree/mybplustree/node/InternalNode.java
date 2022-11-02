@@ -28,7 +28,7 @@ public class InternalNode extends AbstractNode {
         //判断叶子节点是否需要切分
         if (child.isOverflow()) {
             Node sibling = child.split();
-            insertChild(key, sibling);
+            insertChild(sibling.getFirstLeafKey(), sibling);
         }
         //判断上层节点是否需要切分
         if (root.isOverflow()) {
@@ -54,6 +54,14 @@ public class InternalNode extends AbstractNode {
         }
     }
 
+    public void deleteChild(String key){
+        int loc = Collections.binarySearch(keys, key);
+        if (loc >= 0) {
+            keys.remove(loc);
+            children.remove(loc + 1);
+        }
+    }
+
     @Override
     public String getValue(String key) {
         return getChild(key).getValue(key);
@@ -65,14 +73,53 @@ public class InternalNode extends AbstractNode {
     }
 
     @Override
-    public boolean deleteValue(String key) {
+    public boolean deleteValue(String key,Node root) {
         Node child = getChild(key);
-        child.deleteValue(key);
-        if (child.isUnderflow()){
-            //TODO
+        child.deleteValue(key,root);
+        if (child.isUnderflow()) {
+            //获得左兄弟节点
+            Node childLeftSibling = getChildLeftSibling(key);
+            //获得右兄弟节点
+            Node childRightSibling = getChildRightSibling(key);
+
+            //左  中  右
+            //1.左不为空  则左中合并
+            //2.左为空    则中右合并
+            Node left = childLeftSibling != null ? childLeftSibling : child;
+            Node right = childLeftSibling != null ? child : childRightSibling;
+
+            left.merge(right);
+            deleteChild(right.getFirstLeafKey());
+            if (left.isOverflow()){
+                Node sibling = left.split();
+                insertChild(sibling.getFirstLeafKey(), sibling);
+            }
+            if (root.keyNumber() == 0)
+                root = left;
         }
-        return getChild(key).deleteValue(key);
+        return true;
     }
+
+    //获取左兄弟叶子节点
+    public Node getChildLeftSibling(String key) {
+        int loc = Collections.binarySearch(keys, key);
+        int childSiblingIndex = loc >= 0 ? loc + 1 : -loc - 1;
+        if (childSiblingIndex > 0) {
+            return children.get(childSiblingIndex - 1);
+        }
+        return null;
+    }
+
+    //获取右兄弟叶子节点
+    public Node getChildRightSibling(String key) {
+        int loc = Collections.binarySearch(keys, key);
+        int childSiblingIndex = loc >= 0 ? loc + 1 : -loc - 1;
+        if (childSiblingIndex < getKeysNum()) {
+            return children.get(childSiblingIndex + 1);
+        }
+        return null;
+    }
+
 
     public Node getChild(String key) {
         int loc = Collections.binarySearch(keys, key);
@@ -95,10 +142,12 @@ public class InternalNode extends AbstractNode {
         return sibling;
     }
 
-
     @Override
     public void merge(Node sibling) {
-
+        InternalNode node = (InternalNode) sibling;
+        keys.add(node.getFirstLeafKey());
+        keys.addAll(node.keys);
+        children.addAll(node.children);
     }
 
     @Override
@@ -118,6 +167,6 @@ public class InternalNode extends AbstractNode {
 
     @Override
     public boolean isUnderflow() {
-        return children.size()<(branchingFactor+1)/2;
+        return children.size() < (branchingFactor + 1) / 2;
     }
 }

@@ -51,8 +51,8 @@ public class BPlusTree {
         return root.getRange(key1, policy1, key2, policy2);
     }
 
-    public boolean delete(String key){
-        return root.deleteValue(key);
+    public void delete(String key){
+        root.deleteValue(key, root);
     }
 
     @Override

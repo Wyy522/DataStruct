@@ -17,7 +17,7 @@ public abstract class AbstractNode implements Node{
     public abstract List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2);
 
     @Override
-    public abstract boolean deleteValue(String key);
+    public abstract boolean deleteValue(String key,Node root);
 
     @Override
     public abstract Node insertValue(String key, String value,Node root);
