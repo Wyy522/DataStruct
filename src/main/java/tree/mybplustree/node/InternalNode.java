@@ -21,7 +21,7 @@ public class InternalNode extends AbstractNode {
     }
 
     @Override
-    public Node insertValue(String key, String value, Node root) {
+    public Node insertValue(int key, String value, Node root) {
 
         Node child = getChild(key);
         child.insertValue(key, value, root);
@@ -43,7 +43,7 @@ public class InternalNode extends AbstractNode {
     }
 
 
-    public void insertChild(String key, Node sibling) {
+    public void insertChild(int key, Node sibling) {
         int loc = Collections.binarySearch(keys, key);
         int childIndex = loc >= 0 ? loc + 1 : -loc - 1;
         if (loc >= 0) {
@@ -54,7 +54,7 @@ public class InternalNode extends AbstractNode {
         }
     }
 
-    public void deleteChild(String key){
+    public void deleteChild(int key) {
         int loc = Collections.binarySearch(keys, key);
         if (loc >= 0) {
             keys.remove(loc);
@@ -63,19 +63,19 @@ public class InternalNode extends AbstractNode {
     }
 
     @Override
-    public String getValue(String key) {
+    public String getValue(int key) {
         return getChild(key).getValue(key);
     }
 
     @Override
-    public List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2) {
+    public List<String> getRange(int key1, RangePolicy policy1, int key2, RangePolicy policy2) {
         return getChild(key1).getRange(key1, policy1, key2, policy2);
     }
 
     @Override
-    public boolean deleteValue(String key,Node root) {
+    public boolean deleteValue(int key, Node root) {
         Node child = getChild(key);
-        child.deleteValue(key,root);
+        child.deleteValue(key, root);
         if (child.isUnderflow()) {
             //获得左兄弟节点
             Node childLeftSibling = getChildLeftSibling(key);
@@ -90,7 +90,7 @@ public class InternalNode extends AbstractNode {
 
             left.merge(right);
             deleteChild(right.getFirstLeafKey());
-            if (left.isOverflow()){
+            if (left.isOverflow()) {
                 Node sibling = left.split();
                 insertChild(sibling.getFirstLeafKey(), sibling);
             }
@@ -101,7 +101,7 @@ public class InternalNode extends AbstractNode {
     }
 
     //获取左兄弟叶子节点
-    public Node getChildLeftSibling(String key) {
+    public Node getChildLeftSibling(int key) {
         int loc = Collections.binarySearch(keys, key);
         int childSiblingIndex = loc >= 0 ? loc + 1 : -loc - 1;
         if (childSiblingIndex > 0) {
@@ -111,7 +111,7 @@ public class InternalNode extends AbstractNode {
     }
 
     //获取右兄弟叶子节点
-    public Node getChildRightSibling(String key) {
+    public Node getChildRightSibling(int key) {
         int loc = Collections.binarySearch(keys, key);
         int childSiblingIndex = loc >= 0 ? loc + 1 : -loc - 1;
         if (childSiblingIndex < getKeysNum()) {
@@ -121,8 +121,9 @@ public class InternalNode extends AbstractNode {
     }
 
 
-    public Node getChild(String key) {
+    public Node getChild(int key) {
         int loc = Collections.binarySearch(keys, key);
+
         //要进行loc+1的原因是因为第一个节点没有存在上层节点中
         int valueIndex = loc >= 0 ? loc + 1 : -loc - 1;
         return children.get(valueIndex);
@@ -151,7 +152,7 @@ public class InternalNode extends AbstractNode {
     }
 
     @Override
-    public String getFirstLeafKey() {
+    public int getFirstLeafKey() {
         return children.get(0).getFirstLeafKey();
     }
 

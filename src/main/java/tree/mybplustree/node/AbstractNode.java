@@ -4,26 +4,26 @@ import java.util.List;
 
 public abstract class AbstractNode implements Node{
 
-    List<String> keys;
+    List<Integer> keys;
     @Override
     public int keyNumber() {
         return keys.size();
     }
 
     @Override
-    public abstract String getValue(String key);
+    public abstract String getValue(int key);
 
     @Override
-    public abstract List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2);
+    public abstract List<String> getRange(int key1, RangePolicy policy1, int key2, RangePolicy policy2);
 
     @Override
-    public abstract boolean deleteValue(String key,Node root);
+    public abstract boolean deleteValue(int key,Node root);
 
     @Override
-    public abstract Node insertValue(String key, String value,Node root);
+    public abstract Node insertValue(int key, String value,Node root);
 
     @Override
-    public abstract String getFirstLeafKey() ;
+    public abstract int getFirstLeafKey() ;
 
     @Override
     public abstract boolean isOverflow();

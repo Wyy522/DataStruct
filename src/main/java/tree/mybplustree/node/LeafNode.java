@@ -1,7 +1,5 @@
 package tree.mybplustree.node;
 
-import practice.excutorservice.TaskExecutor;
-
 import java.util.*;
 
 public class LeafNode extends AbstractNode {
@@ -23,12 +21,11 @@ public class LeafNode extends AbstractNode {
 
 
     @Override
-    public Node insertValue(String key, String value, Node root) {
+    public Node insertValue(int key, String value, Node root) {
 
         //查找插入位置
         int loc = Collections.binarySearch(keys, key);
         int valueIndex = loc >= 0 ? loc : -loc - 1;
-
         //插入
         if (loc >= 0) {
             values.set(valueIndex, value);
@@ -49,20 +46,20 @@ public class LeafNode extends AbstractNode {
     }
 
     @Override
-    public String getValue(String key) {
+    public String getValue(int key) {
         int loc = Collections.binarySearch(keys, key);
         return loc >= 0 ? values.get(loc) : null;
     }
 
     @Override
-    public List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2) {
+    public List<String> getRange(int key1, RangePolicy policy1, int key2, RangePolicy policy2) {
         List<String> result = new LinkedList<>();
         LeafNode thisNode = this;
         while (thisNode != null) {
-            Iterator<String> kIter = thisNode.keys.iterator();
+            Iterator<Integer> kIter = thisNode.keys.iterator();
             Iterator<String> vIter = thisNode.values.iterator();
             while (kIter.hasNext()) {
-                String key = kIter.next();
+                Integer key = kIter.next();
                 String value = vIter.next();
                 int cmp1 = key.compareTo(key1);
                 int cmp2 = key.compareTo(key2);
@@ -82,7 +79,7 @@ public class LeafNode extends AbstractNode {
     }
 
     @Override
-    public boolean deleteValue(String key,Node root) {
+    public boolean deleteValue(int key,Node root) {
         //找到Key的索引位置
         int loc = Collections.binarySearch(keys, key);
         if (loc >= 0) {
@@ -128,7 +125,7 @@ public class LeafNode extends AbstractNode {
     }
 
     @Override
-    public String getFirstLeafKey() {
+    public int getFirstLeafKey() {
         return keys.get(0);
     }
 

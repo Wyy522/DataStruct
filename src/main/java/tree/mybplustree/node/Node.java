@@ -14,13 +14,13 @@ public interface Node{
 
     int keyNumber();
 
-    String getValue(String key);
+    String getValue(int key);
 
-    boolean deleteValue(String key,Node root);
+    boolean deleteValue(int key,Node root);
 
-    Node insertValue(String key, String value,Node root);
+    Node insertValue(int key, String value,Node root);
 
-    String getFirstLeafKey();
+    int getFirstLeafKey();
 
     boolean isOverflow();
 
@@ -32,5 +32,5 @@ public interface Node{
 
     public String toString() ;
 
-    List<String> getRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2);
+    List<String> getRange(int key1, RangePolicy policy1, int key2, RangePolicy policy2);
 }

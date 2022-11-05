@@ -4,7 +4,21 @@ import java.util.List;
 
 public class APP {
     public static void main(String[] args) {
-        binarySearchTest();
+        List<String> s = new ArrayList<>();
+        s.add("6");
+        String s1 = "10";
+        int i = Collections.binarySearch(s, s1);
+        System.out.println(i);
+        int valueIndex = i >= 0 ? i + 1 : -i - 1;
+        System.out.println(valueIndex);
+
+        List<Integer> x = new ArrayList<>();
+        x.add(6);
+        int x1 = 10;
+        int ii = Collections.binarySearch(x, x1);
+        System.out.println(ii);
+        int valueIndexx = ii >= 0 ? ii + 1 : -ii - 1;
+        System.out.println(valueIndexx);
     }
 
     //二分查找测试

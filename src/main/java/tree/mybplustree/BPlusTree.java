@@ -39,19 +39,19 @@ public class BPlusTree {
     }
 
 
-    public void insert(String key,String value){
+    public void insert(int key,String value){
         root = root.insertValue(key, value, root);
     }
 
-    public String search(String key){
+    public String search(int key){
         return root.getValue(key);
     }
 
-    public List<String> searchRange(String key1, RangePolicy policy1, String key2, RangePolicy policy2) {
+    public List<String> searchRange(int key1, RangePolicy policy1, int key2, RangePolicy policy2) {
         return root.getRange(key1, policy1, key2, policy2);
     }
 
-    public void delete(String key){
+    public void delete(int key){
         root.deleteValue(key, root);
     }
 
