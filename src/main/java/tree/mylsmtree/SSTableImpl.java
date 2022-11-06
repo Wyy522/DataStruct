@@ -1,4 +1,4 @@
 package tree.mylsmtree;
 
-public class SSTable {
+public class SSTableImpl {
 }
