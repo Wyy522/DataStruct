@@ -9,10 +9,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class APP {
     public static void main(String[] args) throws InterruptedException {
-        String[] strings=new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t"};
+        String[] strings=new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","aa","bb","cc","dd","ee","ff","gg","hh","ii","jj"};
+//        System.out.println(strings.length);
         LsmTreeDB lsmTreeDB=new LsmTreeDB("src/LsmTreeTestFile");
         lsmTreeDB.start();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 10; i++) {
+            lsmTreeDB.set(strings[i],String.valueOf(i));
+        }
+        Thread.sleep(1000);
+        for (int i = 10; i < 20; i++) {
+            lsmTreeDB.set(strings[i],String.valueOf(i));
+        }
+        Thread.sleep(1000);
+        for (int i = 20; i < 30; i++) {
             lsmTreeDB.set(strings[i],String.valueOf(i));
         }
         Thread.sleep(1000);

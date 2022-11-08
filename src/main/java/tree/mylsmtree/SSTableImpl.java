@@ -8,27 +8,28 @@ import java.util.LinkedList;
 import java.util.TreeMap;
 
 public class SSTableImpl {
-    private int levelNumb;
-    private int segmentId;
     private int partSize;
     private String path;
-    private Deque<Segment> segments;
 
-    public SSTableImpl(int segmentId, int partSize, String path) {
-        this.segmentId = segmentId;
+    public SSTableImpl( int partSize, String path ) {
         this.partSize = partSize;
         this.path = path;
-        this.segments=new LinkedList<>();
     }
 
-    public void persistent(TreeMap<String, Command> memTable){
-        segmentId++;
-        SegmentImpl segment=new SegmentImpl(path, segmentId, levelNumb, partSize);
+    public void persistent(TreeMap<String, Command> memTable,int levelNumb,int numb,Deque<SegmentImpl> level){
+
+        SegmentImpl segment=new SegmentImpl(path, partSize,levelNumb,numb);
         try {
             segment.persist(memTable);
         } catch (IOException e) {
             throw new ioException(e.toString());
         }
-        segments.offerFirst(segment);
+        level.offerFirst(segment);
+
+
+    }
+
+    public void merge(){
+
     }
 }

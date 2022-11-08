@@ -10,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Optional;
-import java.util.RandomAccess;
 
 public class WALImpl implements WAL {
 
@@ -54,8 +53,8 @@ public class WALImpl implements WAL {
         File cur = new File(FileUtils.buildFileName(path, String.valueOf(WAL_OP),String.valueOf(WAL_OP),WAL_File_NAME));
         cur.delete();
         cur.createNewFile();
-//        this.writer = new RandomAccessFile(FileUtils.buildFileName(path, String.valueOf(WAL_OP),String.valueOf(WAL_OP),WAL_File_NAME), "rw");
-//        this.reader = new RandomAccessFile(FileUtils.buildFileName(path,String.valueOf(WAL_OP),String.valueOf(WAL_OP),WAL_File_NAME), "r");
+        this.writer = new RandomAccessFile(FileUtils.buildFileName(path, String.valueOf(WAL_OP),String.valueOf(WAL_OP),WAL_File_NAME), "rw");
+        this.reader = new RandomAccessFile(FileUtils.buildFileName(path,String.valueOf(WAL_OP),String.valueOf(WAL_OP),WAL_File_NAME), "r");
 
     }
 }

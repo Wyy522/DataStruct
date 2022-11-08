@@ -4,8 +4,7 @@ import tree.mylsmtree.excpetion.ioException;
 import tree.mylsmtree.excpetion.writeException;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /*
  * 写流程
@@ -24,22 +23,30 @@ public class LsmTreeDB {
 
     private TreeMap<String, Command> memTable;
     private TreeMap<String, Command> immutableMemTable;
+    private int levelNumb;
+    private int numb;
+
     private SSTableImpl ssTable;
+    private TreeMap<Integer, Deque<SegmentImpl>> ssTables;
+    private Deque<SegmentImpl> level;
+
     private WAL wal;
 
     public LsmTreeDB(String path) {
         this.path = path;
         memTable = new TreeMap<>();
         immutableMemTable = new TreeMap<>();
-        ssTable = new SSTableImpl(0,PART_SIZE,path);
+        ssTable = new SSTableImpl(PART_SIZE, path);
+        ssTables = new TreeMap<Integer, Deque<SegmentImpl>>();
+        level = new LinkedList<SegmentImpl>();
         wal = new WALImpl(path);
     }
 
     public void start() {
-        this.isRunning=true;
+        this.isRunning = true;
         //TODO reload data from wal and meta date from ssTable
-        Thread t=new Thread(()->{
-            while(isRunning){
+        Thread t = new Thread(() -> {
+            while (isRunning) {
                 memTablePersist();
                 try {
                     Thread.sleep(1000);
@@ -51,13 +58,16 @@ public class LsmTreeDB {
         t.start();
     }
 
-    public void stop(){
-        this.isRunning=false;
+    public void stop() {
+        this.isRunning = false;
+        int i=0;
+//            System.out.println("key:"+e.getKey()+",value:"+ ( ((LinkedList) e.getValue()).get(i++)).toString());
+        System.out.println(ssTables.size());
     }
 
-    public void set(String key ,String value) throws InterruptedException {
-        Command command=new Command(1,key,value);
-        memTable.put(key,command);
+    public void set(String key, String value) throws InterruptedException {
+        Command command = new Command(1, key, value);
+        memTable.put(key, command);
         try {
             wal.write(command);
         } catch (IOException e) {
@@ -80,12 +90,16 @@ public class LsmTreeDB {
         }
         //immutableMemTable落盘
         memTable.clear();
-        ssTable.persistent(immutableMemTable);
+        ssTable.persistent(immutableMemTable, levelNumb, numb++, level);
         immutableMemTable.clear();
         try {
             wal.clear();
         } catch (IOException e) {
             throw new ioException(e.toString());
+        }
+        if (numb % 2 == 0) {
+            levelNumb++;
+            numb = 0;
         }
     }
 }
