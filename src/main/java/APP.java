@@ -1,17 +1,16 @@
-import tree.mylsmtree.FileUtils;
-import tree.mylsmtree.LsmTreeDB;
+import tree.mylsmtrees.LSMTreeImpl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class APP {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         String[] strings=new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","aa","bb","cc","dd","ee","ff","gg","hh","ii","jj"};
-//        System.out.println(strings.length);
-        LsmTreeDB lsmTreeDB=new LsmTreeDB("src/LsmTreeTestFile");
+        System.out.println(strings.length);
+        LSMTreeImpl lsmTreeDB=new LSMTreeImpl("src/LsmTreeTestFile");
         lsmTreeDB.start();
         for (int i = 0; i < 10; i++) {
             lsmTreeDB.set(strings[i],String.valueOf(i));
@@ -27,6 +26,7 @@ public class APP {
         Thread.sleep(1000);
         lsmTreeDB.stop();
     }
+
 
     private static void CASTest() {
         AtomicBoolean a = new AtomicBoolean(true);
