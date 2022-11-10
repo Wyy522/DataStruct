@@ -5,6 +5,7 @@ import tree.mylsmtrees.Command;
 import tree.mylsmtrees.excpetion.ioException;
 import tree.mylsmtrees.excpetion.randomAccessFileException;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -39,6 +40,13 @@ public class WALImpl implements WAL{
 
     @Override
     public void clear() throws IOException {
+        this.reader.close();
+        this.writer.close();
+        File cur = new File(discipline.mylsmtree.FileUtils.buildFileName(path, String.valueOf(WAL_OP),String.valueOf(WAL_OP),WAL_File_NAME));
+        cur.delete();
+        cur.createNewFile();
+        this.writer = new RandomAccessFile(discipline.mylsmtree.FileUtils.buildFileName(path, String.valueOf(WAL_OP),String.valueOf(WAL_OP),WAL_File_NAME), "rw");
+        this.reader = new RandomAccessFile(discipline.mylsmtree.FileUtils.buildFileName(path,String.valueOf(WAL_OP),String.valueOf(WAL_OP),WAL_File_NAME), "r");
 
     }
 }

@@ -26,4 +26,13 @@ public class SSTableMetaData {
         return buffer.array();
     }
 
+    @Override
+    public String toString() {
+        return "SSTableMetaData{" +
+                "numb=" + numb +
+                ", level=" + level +
+                ", dataOffset=" + dataOffset +
+                ", dataLen=" + dataLen +
+                '}';
+    }
 }

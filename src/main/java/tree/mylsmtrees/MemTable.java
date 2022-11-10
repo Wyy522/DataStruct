@@ -1,32 +1,54 @@
 package tree.mylsmtrees;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.eventbus.EventBus;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static tree.mylsmtrees.Constant.*;
+
 public class MemTable {
     TreeMap<String, Command> memTable;
+
     private int levelNumb;
     private int memTableLength;
-    private volatile boolean  isImmTable = false;
+    EventBus eventBus;
+    private volatile boolean isImmTable = false;
     ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     public MemTable() {
-        this.memTable = new TreeMap<String, Command>();
+        this(new EventBus());
     }
 
-    public void put(Command command) {
+    public MemTable(EventBus eventBus) {
+        this.memTable = new TreeMap<String, Command>();
+        this.eventBus=eventBus;
+    }
+
+    public boolean put(Command command) {
         try {
             lock.writeLock().lock();
-            memTable.put(command.getKey(), command);
-            memTableLength+=JSON.toJSONBytes(command).length;
+            memTableLength+=command.getBytes(command);
+            if (memTableLength<=PAGE_SIZE){
+                memTable.put(command.getKey(),command);
+                System.out.println(command.toString());
+
+                return true;
+            }else{
+                memTableLength=0;
+                System.out.println(memTableLength);
+                eventBus.post(memTable);
+                return false;
+            }
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public void clear(){
+    public void clear() {
         memTable.clear();
     }
 
@@ -62,4 +84,14 @@ public class MemTable {
         isImmTable = immTable;
     }
 
+    @Override
+    public String toString() {
+        return "MemTable{" +
+                "memTable=" + memTable +
+                ", levelNumb=" + levelNumb +
+                ", memTableLength=" + memTableLength +
+                ", isImmTable=" + isImmTable +
+                ", lock=" + lock +
+                '}';
+    }
 }
