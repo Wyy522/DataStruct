@@ -1,6 +1,8 @@
 package tree.mylsmtrees;
 
 public class Constant {
+
+    //数据内容
     public static final int PAGE_SIZE = 6300;//控制在两页内
     public static final int TEST_PAGE_MAX=970;
     public static final int TEST_THRESHOLD_SIZE=1024;

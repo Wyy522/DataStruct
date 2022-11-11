@@ -48,7 +48,7 @@ public class ParseIndex {
     }
 
 
-    public class SparseIndexItem {
+    public static class SparseIndexItem {
         String key;
         String value;
         int pageNumb;

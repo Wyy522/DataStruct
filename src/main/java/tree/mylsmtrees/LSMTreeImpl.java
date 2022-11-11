@@ -2,13 +2,6 @@ package tree.mylsmtrees;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import discipline.mylsmtree.SegmentImpl;
-import sun.dc.pr.PRError;
-import tree.mylsmtrees.Command;
-import tree.mylsmtrees.WAL;
-import tree.mylsmtrees.WALImpl;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +16,8 @@ public class LSMTreeImpl {
     private SSTable ssTable;
     private MemTable memTable;
     private WAL wal;
-    List<MemTable> memTables;
+    private List<MemTable> afterMergeMemTable;
+    SSTableToMemIterator ssTableToMemIterator;
 
     public LSMTreeImpl(String path) throws IOException {
         this.path = path;
@@ -32,7 +26,8 @@ public class LSMTreeImpl {
         this.wal = new WALImpl(path);
         this.isRunning = false;
         this.eventBus.register(this);
-        this.memTables = new ArrayList<>();
+        this.ssTableToMemIterator = new SSTableToMemIterator();
+        this.afterMergeMemTable=new ArrayList<>();
     }
 
     public void start() {
@@ -79,13 +74,17 @@ public class LSMTreeImpl {
     }
 
     public void merge() {
+        SSTableToMem s0 = ssTableToMemIterator.ssTableToMemS.get(0);
+        SSTableToMem s1 = ssTableToMemIterator.ssTableToMemS.get(1);
+        s1.compare(s0,afterMergeMemTable);
+        System.out.println("每个单页合并完结果为---------------------"+afterMergeMemTable);
 
     }
 
+
     public void loadSSTableToMemory(String path, int levelNumb, int numb) throws IOException {
         //存放所有meTable的数组(merge时用)
-        ssTable.loadToMemory(path, levelNumb, numb, memTables);
-        System.out.println(memTables.toString());
+        ssTable.loadToMemory(path, levelNumb, numb, ssTableToMemIterator.ssTableToMemS);
     }
 
 }

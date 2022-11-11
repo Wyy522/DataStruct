@@ -19,6 +19,8 @@ public class APP {
 //        lsmTreeDB.stop();
         lsmTreeDB.loadSSTableToMemory(PATH,0,0);
         lsmTreeDB.loadSSTableToMemory(PATH,0,1);
+
+        lsmTreeDB.merge();
     }
 
 

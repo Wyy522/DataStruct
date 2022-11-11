@@ -89,7 +89,7 @@ public class SSTable {
         writer.close();
     }
 
-    public void loadToMemory(String path, int levelNumb, int numb,List<MemTable> memTables) throws IOException {
+    public void loadToMemory(String path, int levelNumb, int numb,List<SSTableToMem> ssTableToMemS) throws IOException {
         //获得写文件句柄
         reader = new RandomAccessFile(FileUtils.buildFileName(path, String.valueOf(levelNumb), String.valueOf(numb), SSTable_FILE_NAME), "r");
 
@@ -100,11 +100,13 @@ public class SSTable {
         //读取稀疏索引
         System.out.println("稀疏索引解析结果为---------------------");
         List<ParseIndex.SparseIndexItem> sparseIndexItems = parseIndexToList();
-        System.out.println(sparseIndexItems.toString());
-        //读取数据
+//        System.out.println(sparseIndexItems.toString());
+        //读取数据(每TEST_THRESHOLD_SIZE大小一个MemTable)
         System.out.println("数据解析结果为---------------------");
-        parseData(memTables, sparseIndexItems.size());
-//        System.out.println(memTable.toString());
+        List<MemTable> memTables = parseData(sparseIndexItems.size(),ssTableMetaData.getNumb());
+
+        SSTableToMem ssTableToMem=new SSTableToMem(ssTableMetaData,sparseIndexItems,memTables);
+        ssTableToMemS.add(ssTableToMem);
     }
 
     public SSTableMetaData parseSSTableMetaData() throws IOException {
@@ -131,14 +133,12 @@ public class SSTable {
         return JSON.parseArray(s, ParseIndex.SparseIndexItem.class);
     }
 
-    public void parseData(List<MemTable> memTables, int pageNumb) throws IOException {
-//        //判空
-//        if (pageNumb == 0) {
-//            return null;
-//        }
+    public List<MemTable> parseData(int pageNumb,int numb) throws IOException {
+
+        ArrayList<MemTable> memTables = new ArrayList<>();
         //读取所有页里的数据到内存中
-        MemTable memTable = new MemTable();
         for (int i = 1; i <= pageNumb; i++) {
+            MemTable memTable = new MemTable(numb);
             //跳转下一页
             reader.seek((long) i * TEST_THRESHOLD_SIZE);
             try {
@@ -161,9 +161,10 @@ public class SSTable {
             } catch (Exception e) {
                 //关闭文件流
                 reader.close();
-                memTables.add(memTable);
             }
+            memTables.add(memTable);
         }
+        return memTables;
     }
 
 
