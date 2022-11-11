@@ -1,12 +1,9 @@
 package tree.mylsmtrees;
 
 import com.alibaba.fastjson.JSON;
-import tree.mylsmtrees.Command;
-import tree.mylsmtrees.excpetion.ioException;
-import tree.mylsmtrees.excpetion.randomAccessFileException;
+import tree.mylsmtrees.utils.FileUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Optional;

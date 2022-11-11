@@ -10,6 +10,8 @@ import tree.mylsmtrees.WALImpl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 
@@ -17,10 +19,11 @@ public class LSMTreeImpl {
     private String path;
     private Boolean isRunning;
     private Boolean isPersist;
-    EventBus eventBus=new EventBus();
+    EventBus eventBus = new EventBus();
     private SSTable ssTable;
     private MemTable memTable;
     private WAL wal;
+    List<MemTable> memTables;
 
     public LSMTreeImpl(String path) throws IOException {
         this.path = path;
@@ -29,12 +32,13 @@ public class LSMTreeImpl {
         this.wal = new WALImpl(path);
         this.isRunning = false;
         this.eventBus.register(this);
+        this.memTables = new ArrayList<>();
     }
 
     public void start() {
         this.isRunning = true;
-        Thread thread=new Thread(()->{
-            while (isRunning){
+        Thread thread = new Thread(() -> {
+            while (isRunning) {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -46,7 +50,6 @@ public class LSMTreeImpl {
     }
 
 
-
     public void stop() throws IOException {
         this.isRunning = false;
     }
@@ -54,7 +57,7 @@ public class LSMTreeImpl {
     @Subscribe
     private void doMemTablePersist(TreeMap<String, Command> memTable) throws IOException {
         System.out.println("log :正在持久化");
-        Thread thread=new Thread(()->{
+        Thread thread = new Thread(() -> {
             try {
                 ssTable.persistent(memTable, path);
                 wal.clear();
@@ -70,17 +73,19 @@ public class LSMTreeImpl {
         wal.write(command);
         if (!memTable.put(command)) {
             Thread.sleep(1000);
-            this.memTable=new MemTable(eventBus);
+            this.memTable = new MemTable(eventBus);
             memTable.put(command);
         }
     }
 
-    public void merge(){
+    public void merge() {
 
     }
 
-    public void loadSSTableToMemory(String path,int levelNumb,int numb) throws IOException {
-        ssTable.loadToMemory(path,levelNumb,numb);
+    public void loadSSTableToMemory(String path, int levelNumb, int numb) throws IOException {
+        //存放所有meTable的数组(merge时用)
+        ssTable.loadToMemory(path, levelNumb, numb, memTables);
+        System.out.println(memTables.toString());
     }
 
 }

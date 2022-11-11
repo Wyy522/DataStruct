@@ -16,7 +16,6 @@ public class SSTableImpl {
     }
 
     public void persistent(TreeMap<String, Command> memTable, SegmentImpl segment, int levelNumb, int numb, Deque<SegmentImpl> level){
-
         try {
             segment.persist(memTable);
         } catch (IOException e) {

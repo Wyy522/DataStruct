@@ -10,27 +10,45 @@ import static tree.mylsmtrees.Constant.PAGE_SIZE;
 
 public class ParseIndex {
     private List<SparseIndexItem> indexItems;
+    private int length;
+
     public ParseIndex() {
-        indexItems=new ArrayList<>();
+        indexItems = new ArrayList<>();
     }
 
-    public void addIndex(String key,String value , int len, int pageNumb){
+    public void addIndex(String key, String value, int len, int pageNumb) {
         SparseIndexItem item = new SparseIndexItem(key, value, len, pageNumb);
         indexItems.add(item);
+        length++;
     }
 
     public byte[] toByteArray() {
         return JSON.toJSONBytes(indexItems);
     }
 
+
     public List<SparseIndexItem> getIndexItems() {
         return indexItems;
+    }
+
+
+    public int toByteLength() {
+        return JSON.toJSONBytes(indexItems).length;
+    }
+
+    public void Println() {
+        for (SparseIndexItem sparseIndexItem : indexItems) {
+            String s = sparseIndexItem.toString();
+            System.out.println(s);
+        }
     }
 
     public void setIndexItems(List<SparseIndexItem> indexItems) {
         this.indexItems = indexItems;
     }
-    private static class SparseIndexItem {
+
+
+    public class SparseIndexItem {
         String key;
         String value;
         int pageNumb;
@@ -38,11 +56,11 @@ public class ParseIndex {
         int len;
         //TODO bolon filter
 
-        public SparseIndexItem(String key,String value, int len, int pageNumb) {
+        public SparseIndexItem(String key, String value, int len, int pageNumb) {
             this.key = key;
-            this.value=value;
+            this.value = value;
             this.pageNumb = pageNumb;
-            this.offset = (long) pageNumb *PAGE_SIZE;
+            this.offset = (long) pageNumb * PAGE_SIZE;
             this.len = len;
         }
 
@@ -84,6 +102,16 @@ public class ParseIndex {
 
         public void setLen(int len) {
             this.len = len;
+        }
+
+
+        @Override
+        public String toString() {
+            return "SparseIndexItem{" +
+                    "key='" + key + '\'' +
+                    ", offset=" + offset +
+                    ", len=" + len +
+                    '}';
         }
     }
 }

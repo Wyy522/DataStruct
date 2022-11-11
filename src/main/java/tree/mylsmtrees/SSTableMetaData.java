@@ -1,5 +1,7 @@
 package tree.mylsmtrees;
 
+import com.alibaba.fastjson.JSON;
+
 import java.nio.ByteBuffer;
 
 import static tree.mylsmtrees.Constant.META_DATA_SIZE;
@@ -34,5 +36,37 @@ public class SSTableMetaData {
                 ", dataOffset=" + dataOffset +
                 ", dataLen=" + dataLen +
                 '}';
+    }
+
+    public int getNumb() {
+        return numb;
+    }
+
+    public void setNumb(int numb) {
+        this.numb = numb;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public long getDataOffset() {
+        return dataOffset;
+    }
+
+    public void setDataOffset(long dataOffset) {
+        this.dataOffset = dataOffset;
+    }
+
+    public int getDataLen() {
+        return dataLen;
+    }
+
+    public void setDataLen(int dataLen) {
+        this.dataLen = dataLen;
     }
 }

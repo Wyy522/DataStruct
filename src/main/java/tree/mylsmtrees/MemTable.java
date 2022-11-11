@@ -35,7 +35,6 @@ public class MemTable {
             if (memTableLength<=PAGE_SIZE){
                 memTable.put(command.getKey(),command);
                 System.out.println(command.toString());
-
                 return true;
             }else{
                 memTableLength=0;
@@ -91,7 +90,6 @@ public class MemTable {
                 ", levelNumb=" + levelNumb +
                 ", memTableLength=" + memTableLength +
                 ", isImmTable=" + isImmTable +
-                ", lock=" + lock +
-                '}';
+                '}'+'\n';
     }
 }

@@ -1,3 +1,4 @@
+import org.apache.commons.lang.RandomStringUtils;
 import tree.mylsmtrees.LSMTreeImpl;
 
 import java.io.IOException;
@@ -6,25 +7,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static tree.mylsmtrees.Constant.PATH;
+
 public class APP {
     public static void main(String[] args) throws InterruptedException, IOException {
-        String[] strings=new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","aa","bb","cc","dd","ee","ff","gg","hh","ii","jj"};
-        System.out.println(strings.length);
-        LSMTreeImpl lsmTreeDB=new LSMTreeImpl("src/LsmTreeTestFile");
-        lsmTreeDB.start();
-        for (int i = 0; i < 10; i++) {
-            lsmTreeDB.set(strings[i],String.valueOf(i));
-        }
-        Thread.sleep(1000);
-        for (int i = 10; i < 20; i++) {
-            lsmTreeDB.set(strings[i],String.valueOf(i));
-        }
-        Thread.sleep(1000);
-        for (int i = 20; i < 30; i++) {
-            lsmTreeDB.set(strings[i],String.valueOf(i));
-        }
-        Thread.sleep(1000);
-        lsmTreeDB.stop();
+        LSMTreeImpl lsmTreeDB=new LSMTreeImpl(PATH);
+//        lsmTreeDB.start();
+//        for (int i = 0; i <400; i++) {
+//            lsmTreeDB.set(RandomStringUtils.randomAlphabetic(5),String.valueOf(i));
+//        }
+//        lsmTreeDB.stop();
+        lsmTreeDB.loadSSTableToMemory(PATH,0,0);
+        lsmTreeDB.loadSSTableToMemory(PATH,0,1);
     }
 
 

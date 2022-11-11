@@ -30,7 +30,8 @@ public class SparseIndex {
         this.indexItems = indexItems;
     }
 
-    static class SparseIndexItem {
+
+    private class SparseIndexItem {
         String key;
         long offset;
         int len;
@@ -67,5 +68,6 @@ public class SparseIndex {
         public void setLen(int len) {
             this.len = len;
         }
+
     }
 }
