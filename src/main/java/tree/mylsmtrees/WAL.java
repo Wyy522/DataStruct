@@ -8,7 +8,9 @@ public interface WAL {
     void write(Command command) throws IOException;
 
     //读出写前日志
-    Optional<Command> read() throws IOException;
+    Command read() throws IOException;
+
+    void readSeek(long pos) throws IOException;
 
     //清空写前日志(当已经落盘后清空WAL)
     void clear() throws IOException;

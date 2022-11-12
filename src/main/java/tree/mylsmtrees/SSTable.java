@@ -27,6 +27,7 @@ public class SSTable {
     private RandomAccessFile reader;
     private ParseIndex parseIndex;
     ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
     public SSTable(String path) throws FileNotFoundException {
         this.path = path;
         reader = new RandomAccessFile(FileUtils.buildFileName(path, String.valueOf(levelNumb), String.valueOf(numb), SSTable_FILE_NAME), "rw");
@@ -59,7 +60,6 @@ public class SSTable {
             //单页长度
             dataPageSize = dataPageSize + len;
             if (dataPageSize >= TEST_PAGE_MAX) {
-                System.out.println(dataPageSize);
                 //记录最后一条Key(key,value,单页长度,页号)
                 parseIndex.addIndex(c.getKey(), c.getValue(), dataPageSize, pageNumb);
                 dataPageSize = 0;
@@ -89,24 +89,27 @@ public class SSTable {
         writer.close();
     }
 
-    public void loadToMemory(String path, int levelNumb, int numb,List<SSTableToMem> ssTableToMemS) throws IOException {
+    public void loadToMemory(String path, int levelNumb, int numb, List<SSTableToMem> ssTableToMemS) throws IOException {
         //获得写文件句柄
         reader = new RandomAccessFile(FileUtils.buildFileName(path, String.valueOf(levelNumb), String.valueOf(numb), SSTable_FILE_NAME), "r");
-
+        int Length = 0;
         //读取元数据(20Bytes)
-        System.out.println("元数据解析结构为---------------------");
+        System.out.println("log(" + levelNumb + "-" + numb + "文件) :正在读取该文件数据");
+        System.out.print("log(" + levelNumb + "-" + numb + "文件) :元数据解析结构为==>");
         SSTableMetaData ssTableMetaData = parseSSTableMetaData();
         System.out.println(ssTableMetaData.toString());
         //读取稀疏索引
-        System.out.println("稀疏索引解析结果为---------------------");
+//        System.out.println("稀疏索引解析结果为---------------------");
         List<ParseIndex.SparseIndexItem> sparseIndexItems = parseIndexToList();
-//        System.out.println(sparseIndexItems.toString());
+        System.out.println("log(" + levelNumb + "-" + numb + "文件) :该文件稀疏索引解析完成");
         //读取数据(每TEST_THRESHOLD_SIZE大小一个MemTable)
-        System.out.println("数据解析结果为---------------------");
-        List<MemTable> memTables = parseData(sparseIndexItems.size(),ssTableMetaData.getNumb());
-
-        SSTableToMem ssTableToMem=new SSTableToMem(ssTableMetaData,sparseIndexItems,memTables);
+//        System.out.println("数据解析结果为---------------------");
+//        List<MemTable> memTables = parseData(sparseIndexItems.size(),ssTableMetaData.getNumb());
+        List<MemTable> memTables = parseData(sparseIndexItems.size(), ssTableMetaData.getNumb(), Length);
+        SSTableToMem ssTableToMem = new SSTableToMem(ssTableMetaData, sparseIndexItems, memTables);
+        System.out.println("log(" + levelNumb + "-" + numb + "文件) :该文件数据解析完成");
         ssTableToMemS.add(ssTableToMem);
+        System.out.println("log(" + levelNumb + "-" + numb + "文件) :文件读取完毕");
     }
 
     public SSTableMetaData parseSSTableMetaData() throws IOException {
@@ -133,7 +136,7 @@ public class SSTable {
         return JSON.parseArray(s, ParseIndex.SparseIndexItem.class);
     }
 
-    public List<MemTable> parseData(int pageNumb,int numb) throws IOException {
+    public List<MemTable> parseData(int pageNumb, int numb) throws IOException {
 
         ArrayList<MemTable> memTables = new ArrayList<>();
         //读取所有页里的数据到内存中
@@ -156,7 +159,7 @@ public class SSTable {
                         break;
                     }
                     //按顺序(TreeMap)放入内存中
-                    memTable.put(cmd);
+                    memTable.puts(cmd);
                 }
             } catch (Exception e) {
                 //关闭文件流
@@ -167,5 +170,99 @@ public class SSTable {
         return memTables;
     }
 
+    public List<MemTable> parseData(int pageNumb, int numb, int length) throws IOException {
 
+        ArrayList<MemTable> memTables = new ArrayList<>();
+        //读取所有页里的数据到内存中
+        for (int i = 1; i <= pageNumb; i++) {
+            MemTable memTable = new MemTable(numb);
+            //跳转下一页
+            reader.seek((long) i * TEST_THRESHOLD_SIZE);
+            try {
+                while (true) {
+                    //读取4字节获得该条数据长度
+                    int dataLength = reader.readInt();
+                    //分配对应内存空间
+                    ByteBuffer bytes = ByteBuffer.allocate(dataLength);
+                    //读取到指定内存中
+                    reader.read(bytes.array());
+                    //将该byte数组转换为Command对象
+                    Command cmd = JSON.parseObject(bytes.array(), 0, dataLength, StandardCharsets.UTF_8, Command.class);
+                    //如果读取到该页最后就换到下一页
+                    if (cmd == null) {
+                        break;
+                    }
+                    //按顺序(TreeMap)放入内存中
+                    memTable.puts(cmd);
+
+                    //记录长度
+                    length += cmd.getLength();
+                }
+            } catch (Exception e) {
+                //关闭文件流
+                reader.close();
+            }
+            memTables.add(memTable);
+        }
+
+//        System.out.println("数据长度为 :"+length);
+        return memTables;
+    }
+
+    public ParseIndex loadIndexToMemory(String path, int levelNumb, int numb) throws IOException {
+        reader = new RandomAccessFile(FileUtils.buildFileName(path, String.valueOf(levelNumb), String.valueOf(numb), SSTable_FILE_NAME), "r");
+        reader.seek(20);
+        List<ParseIndex.SparseIndexItem> sparseIndexItems = parseIndexToList();
+        ParseIndex parseIndex = new ParseIndex();
+        parseIndex.setIndexItems(sparseIndexItems);
+        return parseIndex;
+    }
+
+    public MemTable loadOnePageToMemory(String path, int levelNumb, int numb, int pageNumb) throws IOException {
+        reader.seek((long) pageNumb * TEST_THRESHOLD_SIZE);
+        MemTable memTable = new MemTable(numb);
+        while (true) {
+            try {  //读取4字节获得该条数据长度
+                int dataLength = reader.readInt();
+                //分配对应内存空间
+                ByteBuffer bytes = ByteBuffer.allocate(dataLength);
+                //读取到指定内存中
+                reader.read(bytes.array());
+                //将该byte数组转换为Command对象
+                Command cmd = JSON.parseObject(bytes.array(), 0, dataLength, StandardCharsets.UTF_8, Command.class);
+                //如果读取到该页最后就换到下一页
+                if (cmd == null) {
+                    break;
+                }
+                //按顺序(TreeMap)放入内存中
+                memTable.puts(cmd);
+            } catch (Exception e) {
+                //关闭文件流
+                reader.close();
+                break;
+            }
+        }
+        return memTable;
+    }
+
+    public void levelAdd() {
+        levelNumb = levelNumb + 1;
+        numb = 0;
+    }
+
+    public static int getLevelNumb() {
+        return levelNumb;
+    }
+
+    public static void setLevelNumb(int levelNumb) {
+        SSTable.levelNumb = levelNumb;
+    }
+
+    public int getNumb() {
+        return numb;
+    }
+
+    public void setNumb(int numb) {
+        this.numb = numb;
+    }
 }

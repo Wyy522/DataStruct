@@ -2,16 +2,17 @@ package tree.mylsmtrees;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
+import java.nio.file.Path;
+import java.util.*;
+
+import static tree.mylsmtrees.Constant.PATH;
 
 
 public class LSMTreeImpl {
     private String path;
     private Boolean isRunning;
-    private Boolean isPersist;
     EventBus eventBus = new EventBus();
     private SSTable ssTable;
     private MemTable memTable;
@@ -27,11 +28,12 @@ public class LSMTreeImpl {
         this.isRunning = false;
         this.eventBus.register(this);
         this.ssTableToMemIterator = new SSTableToMemIterator();
-        this.afterMergeMemTable=new ArrayList<>();
+        this.afterMergeMemTable = new ArrayList<>();
     }
 
-    public void start() {
+    public void start() throws IOException {
         this.isRunning = true;
+        reload();
         Thread thread = new Thread(() -> {
             while (isRunning) {
                 try {
@@ -47,6 +49,15 @@ public class LSMTreeImpl {
 
     public void stop() throws IOException {
         this.isRunning = false;
+    }
+
+    public void reload() throws IOException {
+        wal.readSeek(0);
+        while (true) {
+            Command command = wal.read();
+            this.memTable.puts(command);
+        }
+        //TODO load SSTableMetaData to memory
     }
 
     @Subscribe
@@ -66,25 +77,90 @@ public class LSMTreeImpl {
     public void set(String key, String value) throws IOException, InterruptedException {
         Command command = new Command(1, key, value);
         wal.write(command);
-        if (!memTable.put(command)) {
+        if (!memTable.puts(command)) {
             Thread.sleep(1000);
             this.memTable = new MemTable(eventBus);
-            memTable.put(command);
+            memTable.puts(command);
         }
     }
 
-    public void merge() {
-        SSTableToMem s0 = ssTableToMemIterator.ssTableToMemS.get(0);
-        SSTableToMem s1 = ssTableToMemIterator.ssTableToMemS.get(1);
-        s1.compare(s0,afterMergeMemTable);
-        System.out.println("每个单页合并完结果为---------------------"+afterMergeMemTable);
+    public void merge() throws InterruptedException {
+        List<Command> commands = new ArrayList<>();
+        int AllSSTableToMemIteratorLength = ssTableToMemIterator.getLength();
+        System.out.println("log :merge前所有加载到内存的数据长度为 " + AllSSTableToMemIteratorLength);
+        for (int j = 0; j < ssTableToMemIterator.ssTableToMemS.size() - 1; j++) {
+            ssTableToMemIterator.ssTableToMemS.get(j).compare(ssTableToMemIterator.ssTableToMemS.get(j + 1), afterMergeMemTable);
+        }
+//        System.out.println("每个单页合并完结果为---------------------"+afterMergeMemTable);
+        for (MemTable m : afterMergeMemTable) {
+            for (Map.Entry<String, Command> entry : m.getMemTable().entrySet()) {
+                commands.add(entry.getValue());
+            }
+        }
+        //归并排序去重操作规则为:若两个Key相等取Numb较大的;
+        Arrays.sort(commands.toArray());
 
+        int AllAfterMergeLength = 0;
+        for (Command c : commands) {
+            AllAfterMergeLength += c.getLength();
+        }
+        ssTable.levelAdd();
+        System.out.println("log :正在进行merge操作");
+        MemTable memTable = new MemTable(eventBus);
+        for (Command c : commands) {
+            memTable.mergePut(memTable, c);
+        }
+        System.out.println("log :merge操作已完成");
+        System.out.println("log :merge后的数据长度为 " + AllAfterMergeLength);
+        memTable.mergePersistent(memTable);
+        ssTableToMemIterator.ssTableToMemS.clear();
+//        System.out.println("去重后的结果为---------------------" + commands);
+    }
+
+    public Command get(String key) throws IOException {
+
+        Command command = memTable.memTable.get(key);
+        //先去内存中找
+        if (command != null) {
+            return command;
+        }
+        System.out.println("内存中没有该值");
+
+        //去levelNumb小的SSTable中找(走稀疏索引)
+
+        //如果按字典顺序 p.getKey() 位于 key 参数之前，比较结果为一个负整数；如果  p.getKey() 位于 key 之后，比较结果为一个正整数；如果两个字符串相等，则结果为 0。
+        out:
+        for (int i = 0; i < 2; i++) {
+            //读取稀疏索引
+            ParseIndex parseIndex = loadIndexToMemory(0, i);
+            System.out.println(parseIndex.toString());
+            for (ParseIndex.SparseIndexItem p : parseIndex.getIndexItems()) {
+                //和稀疏索引中的key比较
+                int j = p.getKey().compareTo(key);
+                if (j >= 0) {
+                    MemTable memTable = loadOnePageToMemory(0, i, p.getPageNumb());
+                    command = memTable.memTable.get(key);
+                    if (command != null) {
+                        break out;
+                    }
+                }
+            }
+        }
+        return command;
     }
 
 
     public void loadSSTableToMemory(String path, int levelNumb, int numb) throws IOException {
         //存放所有meTable的数组(merge时用)
         ssTable.loadToMemory(path, levelNumb, numb, ssTableToMemIterator.ssTableToMemS);
+    }
+
+    public ParseIndex loadIndexToMemory(int levelNumb, int numb) throws IOException {
+        return ssTable.loadIndexToMemory(path, levelNumb, numb);
+    }
+
+    public MemTable loadOnePageToMemory(int levelNumb, int numb, int pageNumb) throws IOException {
+        return ssTable.loadOnePageToMemory(path, levelNumb, numb, pageNumb);
     }
 
 }

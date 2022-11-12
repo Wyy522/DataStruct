@@ -1,4 +1,5 @@
 import org.apache.commons.lang.RandomStringUtils;
+import tree.mylsmtrees.Command;
 import tree.mylsmtrees.LSMTreeImpl;
 
 import java.io.IOException;
@@ -12,15 +13,18 @@ import static tree.mylsmtrees.Constant.PATH;
 public class APP {
     public static void main(String[] args) throws InterruptedException, IOException {
         LSMTreeImpl lsmTreeDB=new LSMTreeImpl(PATH);
-//        lsmTreeDB.start();
-//        for (int i = 0; i <400; i++) {
-//            lsmTreeDB.set(RandomStringUtils.randomAlphabetic(5),String.valueOf(i));
-//        }
-//        lsmTreeDB.stop();
+        lsmTreeDB.start();
+        for (int i = 0; i <160; i++) {
+            lsmTreeDB.set(RandomStringUtils.randomAlphabetic(5),String.valueOf(i));
+        }
         lsmTreeDB.loadSSTableToMemory(PATH,0,0);
         lsmTreeDB.loadSSTableToMemory(PATH,0,1);
+//        lsmTreeDB.loadSSTableToMemory(PATH,0,2);
 
+//        System.out.println(lsmTreeDB.get("SsheL"));
         lsmTreeDB.merge();
+//        System.out.println(command.getKey());
+        lsmTreeDB.stop();
     }
 
 

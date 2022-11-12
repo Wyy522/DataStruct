@@ -47,6 +47,13 @@ public class ParseIndex {
         this.indexItems = indexItems;
     }
 
+    @Override
+    public String toString() {
+        return "ParseIndex{" +
+                "indexItems=" + indexItems +
+                ", length=" + length +
+                '}';
+    }
 
     public static class SparseIndexItem {
         String key;
