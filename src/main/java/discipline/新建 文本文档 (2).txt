@@ -1,0 +1,28 @@
+KvStore:
+单节点启动 	java -jar .\raft-kvstore-1.0-SNAPSHOT.jar -gc A,localhost,3333
+	 	java -jar .\raft-kvstore-1.0-SNAPSHOT.jar -gc B,localhost,3334
+
+集群启动	java -jar .\raft-kvstore-1.0-SNAPSHOT.jar -gc A,localhost,3333 B,localhost,3334	 C,localhost,3335 
+
+
+Core :
+java -cp .\raft-kvstore-1.0-SNAPSHOT.jar raft.kvstore.server.ServerLauncher  raft-kvstore -gc A,localhost,2333 B,localhost,2334 C,localhost,2335 -m group-member -i A -p2 3333
+
+java -cp .\raft-kvstore-1.0-SNAPSHOT.jar raft.kvstore.server.ServerLauncher  raft-kvstore -gc A,localhost,2333 B,localhost,2334 C,localhost,2335 -m group-member -i B -p2 3334
+
+java -cp .\raft-kvstore-1.0-SNAPSHOT.jar raft.kvstore.server.ServerLauncher  raft-kvstore -gc A,localhost,2333 B,localhost,2334 C,localhost,2335 -m group-member -i C -p2 3335
+
+ protoc --java_out=./main/java/ .\proto\core.proto
+
+-------------------------------------------------
+-gc 
+Set<NodeEndPoint> nodeEndpoints :
+    						 A,localhost,2333
+      						 B,localhost,2334 
+      						 C,localhost,2335
+-m group-member 
+-i A 
+-p2 3333
+
+
+
