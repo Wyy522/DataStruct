@@ -4,10 +4,8 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 
-import static tree.mylsmtrees.Constant.PATH;
 
 
 public class LSMTreeImpl {

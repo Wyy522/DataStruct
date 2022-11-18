@@ -33,6 +33,7 @@ public class SSTable {
         reader = new RandomAccessFile(FileUtils.buildFileName(path, String.valueOf(levelNumb), String.valueOf(numb), SSTable_FILE_NAME), "rw");
     }
 
+    //持久化
     public void persistent(TreeMap<String, Command> memTable, String path) throws IOException {
         //获得文件名称
         String filename = FileUtils.buildFileName(path, String.valueOf(levelNumb), String.valueOf(numb), SSTable_FILE_NAME);

@@ -1,7 +1,6 @@
 package tree.mylsmtrees;
 
 import com.alibaba.fastjson.JSON;
-import discipline.mylsmtree.SparseIndex;
 
 import java.util.ArrayList;
 import java.util.List;

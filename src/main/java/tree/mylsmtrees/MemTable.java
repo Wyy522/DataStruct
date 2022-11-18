@@ -56,13 +56,10 @@ public class MemTable {
 
 
     public void mergePut(MemTable memTable, Command command) {
-//        System.out.println(memTable.memTableLength);
-            memTable.memTable.put(command.getKey(), command);
-//            System.out.println("post");
-
+        memTable.memTable.put(command.getKey(), command);
     }
 
-    public void mergePersistent(MemTable memTable){
+    public void mergePersistent(MemTable memTable) {
         eventBus.post(memTable.getMemTable());
     }
 

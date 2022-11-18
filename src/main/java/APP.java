@@ -12,6 +12,10 @@ import static tree.mylsmtrees.Constant.PATH;
 
 public class APP {
     public static void main(String[] args) throws InterruptedException, IOException {
+        System.out.println(4+"/"+2+"is"+4/2);
+    }
+
+    private static void extracted() throws IOException, InterruptedException {
         LSMTreeImpl lsmTreeDB=new LSMTreeImpl(PATH);
         lsmTreeDB.start();
         for (int i = 0; i <160; i++) {

@@ -6,9 +6,6 @@ import tree.mylsmtrees.utils.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.util.Optional;
-
 public class WALImpl implements WAL {
     private String path;
     private final String WAL_File_NAME = "wal";
@@ -49,11 +46,11 @@ public class WALImpl implements WAL {
     public void clear() throws IOException {
         this.reader.close();
         this.writer.close();
-        File cur = new File(discipline.mylsmtree.FileUtils.buildFileName(path, String.valueOf(WAL_OP), String.valueOf(WAL_OP), WAL_File_NAME));
+        File cur = new File(FileUtils.buildFileName(path, String.valueOf(WAL_OP), String.valueOf(WAL_OP), WAL_File_NAME));
         cur.delete();
         cur.createNewFile();
-        this.writer = new RandomAccessFile(discipline.mylsmtree.FileUtils.buildFileName(path, String.valueOf(WAL_OP), String.valueOf(WAL_OP), WAL_File_NAME), "rw");
-        this.reader = new RandomAccessFile(discipline.mylsmtree.FileUtils.buildFileName(path, String.valueOf(WAL_OP), String.valueOf(WAL_OP), WAL_File_NAME), "r");
+        this.writer = new RandomAccessFile(FileUtils.buildFileName(path, String.valueOf(WAL_OP), String.valueOf(WAL_OP), WAL_File_NAME), "rw");
+        this.reader = new RandomAccessFile(FileUtils.buildFileName(path, String.valueOf(WAL_OP), String.valueOf(WAL_OP), WAL_File_NAME), "r");
 
     }
 }
