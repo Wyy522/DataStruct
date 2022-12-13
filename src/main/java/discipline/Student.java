@@ -3,6 +3,7 @@ package discipline;
 import java.util.Comparator;
 
 public class Student implements Comparable<Student>{
+//    implements Comparable<Student>
     private String name;
     private int age;
     private int score;
@@ -12,6 +13,30 @@ public class Student implements Comparable<Student>{
         this.age = age;
         this.score = score;
     }
+
+    @Override
+    public int compareTo(Student o) {
+                // x   -   y
+        return this.score-o.score;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    @Override
+//    public int compareTo(Student o) {
+//        return this.age-o.age;
+//    }
 
     @Override
     public String toString() {
@@ -45,20 +70,31 @@ public class Student implements Comparable<Student>{
     public void setScore(int score) {
         this.score = score;
     }
-
-    @Override
-    public int compareTo(Student o) {
-        return this.age-o.age;
-    }
 }
 
 //学生年龄比较器
 class StudentAgeComparator implements Comparator<Student>{
+
     @Override
     public int compare(Student o1, Student o2) {
-      return o1.getAge()-o2.getAge();
+        //          23          25
+        int i = o1.getAge() - o2.getAge();
+        //
+        return i;
     }
 }
+
+
+
+
+
+//
+//    implements Comparator<Student>
+//    @Override
+//    public int compare(Student o1, Student o2) {
+//      return o1.getAge()-o2.getAge();
+//    }
+//}
 
 //学生成绩比较器
 class StudentScoreComparator implements Comparator<Student>{

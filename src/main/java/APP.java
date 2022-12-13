@@ -10,11 +10,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static tree.mylsmtrees.Constant.PATH;
 
-public class APP {
-    public static void main(String[] args) throws InterruptedException, IOException {
-        System.out.println(4+"/"+2+"is"+4/2);
-    }
 
+
+public class APP {
+
+}
+
+class t{
     private static void extracted() throws IOException, InterruptedException {
         LSMTreeImpl lsmTreeDB=new LSMTreeImpl(PATH);
         lsmTreeDB.start();
@@ -30,7 +32,6 @@ public class APP {
 //        System.out.println(command.getKey());
         lsmTreeDB.stop();
     }
-
 
     private static void CASTest() {
         AtomicBoolean a = new AtomicBoolean(true);
